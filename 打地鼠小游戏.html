@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <style>
+    body {
+      height: 100vh;
+      font-family: "Courier New", Courier, monospace;
+      cursor: none;
+      /* 禁止元素选择 */
+      user-select: none;
+      /* 禁止拖动元素 */
+      -webkit-user-drag: none;
+    }
+    /* 继承 */
+
+    * {
+      /* 禁止拖动元素 */
+      -webkit-user-drag: inherit;
+    }
+
+    .header {
+      width: 600px;
+      display: flex;
+      justify-content: space-between;
+      margin: 35px auto;
+      font-size: 30px;
+    }
+
+    .content {
+      width: 600px;
+      height: 600px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin: 0 auto;
+    }
+
+    .hole {
+      width: 26%;
+      height: 25%;
+    }
+
+    .footer {
+      width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .footer span {
+      width: 150px;
+      height: 45px;
+      border-radius: 10px;
+      line-height: 45px;
+      background-color: rgb(219, 54, 54);
+      font-size: 25px;
+      border: 4px solid black;
+      display: inline-block;
+    }
+
+    #hammer {
+      width: 120px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      transform: translateY(-40px);
+      transform-origin: bottom;
+      transition: transform 0.2s;
+      /* 禁止锤子图片的点击事件 */
+      pointer-events: none;
+    }
+  </style>
+
+  <body>
+    <div class="header">
+      <div>分数: <span class="score"></span></div>
+      <div>时间: <span class="timer">10</span></div>
+    </div>
+    <div class="content"></div>
+
+    <div class="footer">
+      <span> 开始游戏 </span>
+    </div>
+    <img id="hammer" src="assetes/锤子.png" alt="" />
+  </body>
+  <script>
+    // 敲打声
+    document.body.addEventListener("click", function () {
+      let hit = new Audio("assetes/敲打.mp3");
+      hit.play();
+    });
+    let hammer = document.querySelector("#hammer");
+    // 锤子跟随鼠标移动
+    document.body.onmousemove = function (event) {
+      hammer.style.top = event.clientY - 80 + "px";
+      hammer.style.left = event.clientX + "px";
+    };
+    document.body.onmousedown = function () {
+      hammer.style.transform = "rotate(-38deg)";
+    };
+    document.body.onmouseup = function () {
+      hammer.style.transform = null;
+    };
+    // 地洞列表
+    let holeList = [];
+    // 倒计时
+    let newNumber = 10;
+    // 分数
+    let newScore = 0;
+    let score = document.querySelector(".score");
+    // 分数刷新去Dom
+    score.textContent = newScore;
+    // 创建地洞
+    const content = document.querySelector(".content");
+    for (let i = 0; i < 9; i++) {
+      let hole = document.createElement("img");
+      hole.classList.add("hole");
+      hole.src = "assetes/宝贝球.png";
+      content.append(hole);
+      holeList.push(hole);
+    }
+
+    // 点击开始游戏
+    const start = document.querySelector(".footer");
+    // 倒计时
+    const number = document.querySelector(".timer");
+    start.onclick = function () {
+      // 按钮隐藏
+      start.style.display = "none";
+      // 倒计时
+      let timer2 = setInterval(function () {
+        newNumber--;
+        number.textContent = newNumber;
+        if (newNumber == 0) {
+          clearTimeout(timer);
+          clearInterval(timer2);
+          // 按钮显示
+          newNumber = 10;
+          number.textContent = newNumber;
+          newScore = 0;
+          score.textContent = newScore;
+          start.style.display = "block";
+        }
+      }, 1000);
+      // 随机
+      let timer = setInterval(function () {
+        let raIndx = Math.floor(Math.random() * 9);
+        // 4/1的几率错误 4/3是地鼠
+        if (Math.floor(Math.random() * 4) == 0) {
+          holeList[raIndx].src = "assetes/皮卡丘.png";
+          holeList[raIndx].onclick = function () {
+            newScore--;
+            // 分数刷新去Dom
+            holeList[raIndx].src = "assetes/错.png";
+            score.textContent = newScore;
+            // 防止多次点击
+            holeList[raIndx].onclick = null;
+          };
+        } else {
+          holeList[raIndx].src = "assetes/地鼠.png";
+          holeList[raIndx].onclick = function () {
+            newScore++;
+            // 分数刷新去Dom
+            holeList[raIndx].src = "assetes/对.png";
+            score.textContent = newScore;
+            // 防止多次点击
+            holeList[raIndx].onclick = null;
+          };
+        }
+        setTimeout(function () {
+          holeList[raIndx].src = "assetes/宝贝球.png";
+        }, 800);
+      }, 1000);
+    };
+  </script>
+</html>
